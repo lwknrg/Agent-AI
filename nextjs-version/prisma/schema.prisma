@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Contract {
+  id             Int      @id @default(autoincrement())
+  partner_name   String
+  contract_value Float
+  sign_date      DateTime
+  expiry_date    DateTime
+  priority_level String
+  status         String
+  summary        String?
+  file_url       String?
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+  renewal_terms  String?  // Thêm dòng này
+}
+
+model User {
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
+  password String
+  role     String   @default("admin")
+}

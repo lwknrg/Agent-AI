@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "partner_name": "Công ty Cổ phần Công nghệ FPT",
+    "contract_value": 500000000,
+    "sign_date": "2025-01-15",
+    "expiry_date": "2026-01-15",
+    "priority_level": "Cao",
+    "status": "Đang hoạt động"
+  },
+  {
+    "id": 2,
+    "partner_name": "Tập đoàn Viễn thông Viettel",
+    "contract_value": 120000000,
+    "sign_date": "2025-06-20",
+    "expiry_date": "2026-06-20",
+    "priority_level": "Trung bình",
+    "status": "Chờ đánh giá"
+  },
+  {
+    "id": 3,
+    "partner_name": "Công ty TNHH Dịch vụ Bảo vệ",
+    "contract_value": 45000000,
+    "sign_date": "2025-11-01",
+    "expiry_date": "2026-11-01",
+    "priority_level": "Thấp",
+    "status": "Đang hoạt động"
+  }
+]

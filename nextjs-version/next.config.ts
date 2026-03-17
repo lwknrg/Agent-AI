@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ['@prisma/client', 'prisma'],
   experimental: {
     optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
   },
