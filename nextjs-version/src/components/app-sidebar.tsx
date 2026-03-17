@@ -24,7 +24,7 @@ import {
 const data = {
   user: {
     name: "Admin",
-    email: "admin@kienlongbank.com",
+    email: "Quản trị viên hệ thống", 
     avatar: "",
   },
   navGroups: [
