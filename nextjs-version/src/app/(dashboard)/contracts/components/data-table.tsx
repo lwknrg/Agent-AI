@@ -24,6 +24,8 @@ import {
   Trash2,
   Download,
   Search,
+  CheckCircle,
+  FileText
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -57,22 +59,23 @@ import {
 import { ContractFormDialog } from "./contract-form-dialog"
 import { Contract, ContractFormValues } from "../page"
 
+// THÊM: prop onApproveContract
 interface DataTableProps {
   contracts: Contract[]
   onDeleteContract: (id: number) => void
   onEditContract: (contract: Contract) => void
   onAddContract: (contractData: ContractFormValues) => void
   onDeleteMultipleContracts: (ids: number[]) => void
+  onApproveContract: (id: number) => void 
 }
 
-export function DataTable({ contracts, onDeleteContract, onEditContract, onAddContract, onDeleteMultipleContracts }: DataTableProps) {
+export function DataTable({ contracts, onDeleteContract, onEditContract, onAddContract, onDeleteMultipleContracts, onApproveContract }: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
   const [globalFilter, setGlobalFilter] = useState("")
 
-  // DÁN HÀM VÀO VỊ TRÍ NÀY
   const handleSendReminderEmail = async (contract: Contract) => {
     try {
       const response = await fetch("/api/send-email", {
@@ -111,6 +114,8 @@ export function DataTable({ contracts, onDeleteContract, onEditContract, onAddCo
         return "text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-900/20"
       case "Chờ đánh giá":
         return "text-orange-600 bg-orange-50 dark:text-orange-400 dark:bg-orange-900/20"
+      case "Chờ duyệt": // Thêm màu cho trạng thái Chờ duyệt
+        return "text-purple-600 bg-purple-50 dark:text-purple-400 dark:bg-purple-900/20"
       case "Đã tái tục":
         return "text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20"
       default:
@@ -234,8 +239,31 @@ export function DataTable({ contracts, onDeleteContract, onEditContract, onAddCo
       cell: ({ row }) => {
         const contract = row.original
         return (
-          <div className="flex items-center gap-2">
-            {/* Tích hợp component View */}
+          <div className="flex items-center justify-end gap-2 pr-2">
+            
+            {/* THÊM: Nút Phê duyệt cho trạng thái Chờ duyệt */}
+            {contract.status === "Chờ duyệt" && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="h-8 bg-purple-50 text-purple-600 hover:bg-purple-100 hover:text-purple-700 border-purple-200 cursor-pointer"
+                onClick={() => onApproveContract(contract.id)}
+              >
+                <CheckCircle className="mr-1 size-4" />
+                Phê duyệt
+              </Button>
+            )}
+
+            {/* THÊM: Nút Xem PDF nếu có link */}
+            {contract.file_url && (
+              <Button variant="outline" size="sm" className="h-8 cursor-pointer" asChild>
+                <a href={contract.file_url} target="_blank" rel="noopener noreferrer">
+                  <FileText className="mr-1 size-4" />
+                  Xem File
+                </a>
+              </Button>
+            )}
+
             <ViewContractDialog contract={contract} />
             <EditContractDialog contract={contract} onUpdateContract={onEditContract} />
             
@@ -246,14 +274,6 @@ export function DataTable({ contracts, onDeleteContract, onEditContract, onAddCo
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                {contract.file_url && (
-                  <DropdownMenuItem className="cursor-pointer" asChild>
-                    <a href={contract.file_url} target="_blank" rel="noopener noreferrer">
-                      Xem tệp đính kèm
-                    </a>
-                  </DropdownMenuItem>
-                )}
-                {/* Giữ lại nút gửi email, xóa nút Xem chi tiết */}
                 <DropdownMenuItem 
                   className="cursor-pointer"
                   onClick={() => handleSendReminderEmail(contract)}
@@ -301,7 +321,6 @@ export function DataTable({ contracts, onDeleteContract, onEditContract, onAddCo
   const priorityFilter = table.getColumn("priority_level")?.getFilterValue() as string
   const statusFilter = table.getColumn("status")?.getFilterValue() as string
 
-  // CHÈN HÀM NÀY VÀO ĐÂY
   const handleExportCSV = () => {
     if (!contracts || contracts.length === 0) {
       alert("Không có dữ liệu để xuất")
@@ -359,7 +378,7 @@ export function DataTable({ contracts, onDeleteContract, onEditContract, onAddCo
               onClick={() => {
                 const selectedIds = table.getFilteredSelectedRowModel().rows.map(row => row.original.id)
                 onDeleteMultipleContracts(selectedIds)
-                table.toggleAllRowsSelected(false) // Bỏ chọn tất cả sau khi nhấn xóa
+                table.toggleAllRowsSelected(false)
               }}
             >
               <Trash2 className="mr-2 size-4" />
@@ -409,6 +428,7 @@ export function DataTable({ contracts, onDeleteContract, onEditContract, onAddCo
               <SelectItem value="all">Tất cả</SelectItem>
               <SelectItem value="Đang hoạt động">Đang hoạt động</SelectItem>
               <SelectItem value="Chờ đánh giá">Chờ đánh giá</SelectItem>
+              <SelectItem value="Chờ duyệt">Chờ duyệt</SelectItem>
               <SelectItem value="Đã tái tục">Đã tái tục</SelectItem>
             </SelectContent>
           </Select>

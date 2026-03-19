@@ -13,7 +13,7 @@ export interface Contract {
   priority_level: string
   status: string
   file_url?: string | null
-  renewal_terms?: string | null // Thêm dòng này
+  renewal_terms?: string | null
 }
 
 export interface ContractFormValues {
@@ -23,8 +23,8 @@ export interface ContractFormValues {
   expiry_date: string
   priority_level: string
   status: string
-  file_url?: string // Thêm dòng này
-  renewal_terms?: string // Thêm dòng này
+  file_url?: string
+  renewal_terms?: string
 }
 
 export default function ContractsPage() {
@@ -39,7 +39,6 @@ export default function ContractsPage() {
     try {
       const res = await fetch("/api/contracts")
       const data = await res.json()
-      // Chuyển đổi định dạng ngày giờ chuẩn ISO về YYYY-MM-DD
       const formattedData = data.map((c: any) => ({
         ...c,
         sign_date: new Date(c.sign_date).toISOString().split('T')[0],
@@ -61,7 +60,7 @@ export default function ContractsPage() {
         body: JSON.stringify(data)
       })
       if (res.ok) {
-        fetchContracts() // Tải lại danh sách sau khi thêm thành công
+        fetchContracts()
       }
     } catch (error) {
       console.error("Lỗi thêm hợp đồng:", error)
@@ -85,10 +84,7 @@ export default function ContractsPage() {
   const handleDeleteMultipleContracts = async (ids: number[]) => {
     if (!window.confirm(`Bạn có chắc chắn muốn xóa ${ids.length} hợp đồng đã chọn?`)) return
     try {
-      // Thực thi xóa song song tất cả các ID được truyền vào
       await Promise.all(ids.map(id => fetch(`/api/contracts/${id}`, { method: "DELETE" })))
-      
-      // Cập nhật lại giao diện sau khi xóa thành công
       setContracts(prev => prev.filter(c => !ids.includes(c.id)))
     } catch (error) {
       console.error("Lỗi hệ thống khi xóa nhiều hợp đồng:", error)
@@ -104,7 +100,6 @@ export default function ContractsPage() {
       })
       if (res.ok) {
         const updatedContract = await res.json()
-        // Format lại ngày tháng để bảng không bị lỗi hiển thị
         const formattedUpdated = {
           ...updatedContract,
           sign_date: new Date(updatedContract.sign_date).toISOString().split('T')[0],
@@ -118,6 +113,27 @@ export default function ContractsPage() {
       }
     } catch (error) {
       console.error("Lỗi cập nhật hợp đồng:", error)
+    }
+  }
+
+  // THÊM MỚI: Hàm xử lý gọi API PATCH để duyệt hợp đồng
+  const handleApproveContract = async (id: number) => {
+    try {
+      const res = await fetch(`/api/contracts/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "Đang hoạt động" })
+      })
+      if (res.ok) {
+        // Cập nhật lại UI ngay lập tức mà không cần load lại toàn bộ dữ liệu
+        setContracts((prev) => 
+          prev.map((c) => (c.id === id ? { ...c, status: "Đang hoạt động" } : c))
+        )
+      } else {
+        console.error("Phê duyệt thất bại")
+      }
+    } catch (error) {
+      console.error("Lỗi phê duyệt hợp đồng:", error)
     }
   }
 
@@ -136,6 +152,7 @@ export default function ContractsPage() {
           onEditContract={handleEditContract}
           onAddContract={handleAddContract}
           onDeleteMultipleContracts={handleDeleteMultipleContracts}
+          onApproveContract={handleApproveContract} // Truyền hàm xuống bảng
         />
       </div>
     </div>
