@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     }
 
     // Yêu cầu AI trích xuất đúng với cấu trúc schema.prisma
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" })
     const prompt = `Bạn là hệ thống AI phân tích hợp đồng ngân hàng. Đọc file hợp đồng đính kèm và trích xuất các thông tin sau bằng định dạng JSON:
     - "partner_name": Tên đối tác (Bên B)
     - "contract_value": Giá trị hợp đồng (trả về kiểu số thực float, ví dụ 500000000)
