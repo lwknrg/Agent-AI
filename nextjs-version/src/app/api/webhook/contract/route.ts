@@ -6,6 +6,18 @@ import { v2 as cloudinary } from "cloudinary"
 const prisma = new PrismaClient()
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string)
 
+console.log("Kiểm tra biến môi trường Cloudinary:", {
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME ? "Đã có" : "THIẾU",
+  api_key: process.env.CLOUDINARY_API_KEY ? "Đã có" : "THIẾU",
+  api_secret: process.env.CLOUDINARY_API_SECRET ? "Đã có" : "THIẾU",
+})
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+})
+
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
