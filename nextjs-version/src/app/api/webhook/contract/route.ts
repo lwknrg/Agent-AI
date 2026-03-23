@@ -71,6 +71,23 @@ export async function POST(req: Request) {
     const cleanedJson = responseText.replace(/```json\n?|```/g, "").trim()
     const contractData = JSON.parse(cleanedJson)
 
+    // 3. Lưu dữ liệu vào Database với trạng thái "Chờ đánh giá"
+    const newContract = await prisma.contract.create({
+      data: {
+        partner_name: contractData.partner_name || "Chưa xác định",
+        contract_value: Number(contractData.contract_value) || 0,
+        sign_date: parseSafeDate(contractData.sign_date, 0),
+        expiry_date: parseSafeDate(contractData.expiry_date, 1),
+        priority_level: contractData.priority_level || "Trung bình",
+        status: "Chờ đánh giá", // ĐÃ SỬA CỐ ĐỊNH Ở ĐÂY
+        summary: contractData.summary || "",
+        renewal_terms: contractData.renewal_terms || "",
+        file_url: fileUrl,
+      }
+    })
+
+    return NextResponse.json({ success: true, contract: newContract })
+
   } catch (error) {
     console.error("Lỗi Webhook:", error)
     return NextResponse.json({ error: "Lỗi máy chủ xử lý" }, { status: 500 })
