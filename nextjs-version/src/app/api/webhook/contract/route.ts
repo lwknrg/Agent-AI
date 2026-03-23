@@ -71,7 +71,10 @@ export async function POST(req: Request) {
     const cleanedJson = responseText.replace(/```json\n?|```/g, "").trim()
     const contractData = JSON.parse(cleanedJson)
 
-    // 3. Lưu dữ liệu vào Database với trạng thái "Chờ đánh giá"
+    // Dòng này để ép Vercel nhận diện phiên bản mới
+    console.log("=== ĐÃ NHẬN WEBHOOK MỚI, TRẠNG THÁI: CHỜ ĐÁNH GIÁ ===");
+
+    // 3. Lưu dữ liệu vào Database
     const newContract = await prisma.contract.create({
       data: {
         partner_name: contractData.partner_name || "Chưa xác định",
@@ -79,7 +82,7 @@ export async function POST(req: Request) {
         sign_date: parseSafeDate(contractData.sign_date, 0),
         expiry_date: parseSafeDate(contractData.expiry_date, 1),
         priority_level: contractData.priority_level || "Trung bình",
-        status: "Chờ đánh giá", // ĐÃ SỬA CỐ ĐỊNH Ở ĐÂY
+        status: "Chờ đánh giá", // ĐẢM BẢO GHI ĐÚNG CHỮ NÀY
         summary: contractData.summary || "",
         renewal_terms: contractData.renewal_terms || "",
         file_url: fileUrl,
