@@ -2,7 +2,6 @@
 
 import { BaseLayout } from "@/components/layouts/base-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { PricingPlans } from "@/components/pricing-plans"
 import { CurrentPlanCard } from "./components/current-plan-card"
 import { BillingHistoryCard } from "./components/billing-history-card"
 
@@ -39,13 +38,6 @@ export default function BillingSettings() {
                 Choose a plan that works best for you.
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <PricingPlans 
-                mode="billing" 
-                currentPlanId="professional"
-                onPlanSelect={handlePlanSelect}
-              />
-            </CardContent>
           </Card>
         </div>
       </div>
