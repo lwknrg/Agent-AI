@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Logo } from "@/components/logo"
 import Link from "next/link"
-import Image from "next/image"
 
 export function LoginForm3({ className, ...props }: React.ComponentProps<"div">) {
   const router = useRouter()
@@ -21,12 +20,13 @@ export function LoginForm3({ className, ...props }: React.ComponentProps<"div">)
     setError("")
     
     const formData = new FormData(e.currentTarget)
-    // Lấy giá trị từ ô "Email" để làm username kiểm tra
-    const username = formData.get("email") as string
+    // Lấy giá trị từ ô "Email"
+    const email = formData.get("email") as string
     const password = formData.get("password") as string
 
+    // Đã đổi username thành email
     const res = await signIn("credentials", {
-      username,
+      email,
       password,
       redirect: false,
     })
@@ -60,12 +60,12 @@ export function LoginForm3({ className, ...props }: React.ComponentProps<"div">)
                 </p>
               </div>
               <div className="grid gap-3">
-                <Label htmlFor="user">Username</Label>
-                {/* type="text" để cho phép nhập chữ "admin" */}
+                <Label htmlFor="email">Email</Label>
                 <Input
-                  id="user"
+                  id="email"
                   name="email"
-                  type="text"
+                  type="email"
+                  placeholder="admin@bank.com"
                   required
                 />
               </div>

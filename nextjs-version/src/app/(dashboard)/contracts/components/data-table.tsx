@@ -59,20 +59,20 @@ import { Contract, ContractFormValues } from "../page"
 
 interface DataTableProps {
   contracts: Contract[]
+  role: string
   onDeleteContract: (id: number) => void
   onEditContract: (contract: Contract) => void
   onAddContract: (contractData: ContractFormValues) => void
   onDeleteMultipleContracts: (ids: number[]) => void
 }
 
-export function DataTable({ contracts, onDeleteContract, onEditContract, onAddContract, onDeleteMultipleContracts }: DataTableProps) {
+export function DataTable({ contracts, role, onDeleteContract, onEditContract, onAddContract, onDeleteMultipleContracts }: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
   const [globalFilter, setGlobalFilter] = useState("")
 
-  // DÁN HÀM VÀO VỊ TRÍ NÀY
   const handleSendReminderEmail = async (contract: Contract) => {
     try {
       const response = await fetch("/api/send-email", {
@@ -235,7 +235,6 @@ export function DataTable({ contracts, onDeleteContract, onEditContract, onAddCo
         const contract = row.original
         return (
           <div className="flex items-center gap-2">
-            {/* Tích hợp component View */}
             <ViewContractDialog contract={contract} />
             <EditContractDialog contract={contract} onUpdateContract={onEditContract} />
             
@@ -253,22 +252,27 @@ export function DataTable({ contracts, onDeleteContract, onEditContract, onAddCo
                     </a>
                   </DropdownMenuItem>
                 )}
-                {/* Giữ lại nút gửi email, xóa nút Xem chi tiết */}
-                <DropdownMenuItem 
-                  className="cursor-pointer"
-                  onClick={() => handleSendReminderEmail(contract)}
-                >
-                  Gửi email nhắc nhở
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  variant="destructive"
-                  className="cursor-pointer"
-                  onClick={() => onDeleteContract(contract.id)}
-                >
-                  <Trash2 className="mr-2 size-4" />
-                  Xóa hợp đồng
-                </DropdownMenuItem>
+                
+                {/* Chỉ hiển thị các nút này nếu là Admin */}
+                {role === "admin" && (
+                  <>
+                    <DropdownMenuItem 
+                      className="cursor-pointer"
+                      onClick={() => handleSendReminderEmail(contract)}
+                    >
+                      Gửi email nhắc nhở
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      variant="destructive"
+                      className="cursor-pointer"
+                      onClick={() => onDeleteContract(contract.id)}
+                    >
+                      <Trash2 className="mr-2 size-4" />
+                      Xóa hợp đồng
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -301,7 +305,6 @@ export function DataTable({ contracts, onDeleteContract, onEditContract, onAddCo
   const priorityFilter = table.getColumn("priority_level")?.getFilterValue() as string
   const statusFilter = table.getColumn("status")?.getFilterValue() as string
 
-  // CHÈN HÀM NÀY VÀO ĐÂY
   const handleExportCSV = () => {
     if (!contracts || contracts.length === 0) {
       alert("Không có dữ liệu để xuất")
@@ -352,14 +355,15 @@ export function DataTable({ contracts, onDeleteContract, onEditContract, onAddCo
           </div>
         </div>
         <div className="flex items-center space-x-2">
-          {table.getFilteredSelectedRowModel().rows.length > 0 && (
+          {/* Nút Xóa hàng loạt cũng bị ẩn đối với staff */}
+          {role === "admin" && table.getFilteredSelectedRowModel().rows.length > 0 && (
             <Button
               variant="destructive"
               className="cursor-pointer"
               onClick={() => {
                 const selectedIds = table.getFilteredSelectedRowModel().rows.map(row => row.original.id)
                 onDeleteMultipleContracts(selectedIds)
-                table.toggleAllRowsSelected(false) // Bỏ chọn tất cả sau khi nhấn xóa
+                table.toggleAllRowsSelected(false) 
               }}
             >
               <Trash2 className="mr-2 size-4" />

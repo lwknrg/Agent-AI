@@ -1,29 +1,57 @@
 import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
+import { PrismaClient } from "@prisma/client"
+import bcrypt from "bcryptjs"
+
+const prisma = new PrismaClient()
 
 const handler = NextAuth({
+  session: {
+    strategy: "jwt",
+    maxAge: 24 * 60 * 60, // 1 ngày
+  },
   providers: [
     CredentialsProvider({
-      name: "Tài khoản Quản trị",
+      name: "Tài khoản",
       credentials: {
-        username: { label: "Tên đăng nhập", type: "text", placeholder: "admin" },
+        email: { label: "Email", type: "text", placeholder: "admin@bank.com" },
         password: { label: "Mật khẩu", type: "password" }
       },
       async authorize(credentials) {
-        if (
-          credentials?.username === process.env.ADMIN_USERNAME &&
-          credentials?.password === process.env.ADMIN_PASSWORD
-        ) {
-          // Trả về thông tin người dùng nếu đúng tài khoản/mật khẩu
-          return { id: "1", name: "Admin" }
+        if (!credentials?.email || !credentials?.password) return null
+
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email }
+        })
+
+        if (!user) return null
+
+        const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
+        if (!isPasswordValid) return null
+
+        return {
+          id: user.id.toString(),
+          email: user.email,
+          role: user.role, // Lấy role từ database (admin hoặc staff)
         }
-        // Trả về null nếu sai
-        return null
       }
     })
   ],
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.role = (user as any).role
+      }
+      return token
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        (session.user as any).role = token.role
+      }
+      return session
+    }
+  },
   pages: {
-    // Điều hướng NextAuth sử dụng giao diện đăng nhập tùy chỉnh
     signIn: '/login',
   },
   secret: process.env.NEXTAUTH_SECRET,
