@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { LoginForm3 } from "@/components/login-form-3"
 
 export default function LoginPage() {
